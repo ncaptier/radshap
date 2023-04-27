@@ -1,3 +1,5 @@
+from typing import NoReturn, Optional, Tuple, Callable, Union, Generator
+
 import SimpleITK as sitk
 import matplotlib.pyplot as plt
 import numpy as np
@@ -6,17 +8,44 @@ from ._utils import MplColorHelper
 
 
 def plot_pet_shap(
-    image_path,
-    masks_dict,
-    save_path,
-    alpha=0.7,
-    max_suv=10,
-    cmap_name="seismic",
-    cmap_lim=(0, 0.5),
-    centered_norm=True,
-    plot_colorbar=True,
-    title=None,
-):
+    image_path: str,
+    masks_dict: dict,
+    save_path: str,
+    alpha: Optional[float] = 0.7,
+    max_suv: Optional[float] = 10,
+    cmap_name: Optional[str] = "seismic",
+    cmap_lim: Optional[Tuple[float, float]] = (0, 0.5),
+    centered_norm: Optional[bool] = True,
+    plot_colorbar: Optional[bool] = True,
+    title: Optional[Union[None, str]] = None,
+) -> None:
+    """
+    Parameters
+    ----------
+    image_path:
+
+    masks_dict:
+
+    save_path:
+
+    alpha:
+
+    max_suv:
+
+    cmap_name:
+
+    cmap_lim:
+
+    centered_norm:
+
+    plot_colorbar:
+
+    title:
+
+    Returns
+    -------
+    None
+    """
     # Load image and create MIP views
     img = sitk.ReadImage(image_path)
     img_array = sitk.GetArrayFromImage(img).astype(np.float32)  # [-450:, :, :]
