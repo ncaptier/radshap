@@ -85,7 +85,7 @@ def _get_aggregation_function(aggregation: Union[tuple, list, Callable]) -> Call
                 "Your custom aggregator should take as input a 2D array of shape (n_instances, n_instance_features) "
                 "and it should return a vector of shape (1, n_input_features) (or (n_input_features,))."
             )
-            print(f"The following {err=}, {type(err)=} occured")
+            print(f"The following {err}, {type(err)} occured")
             raise
         else:
             if (not isinstance(test_results, np.ndarray)) or (
@@ -116,7 +116,12 @@ def _check_aggregation(tuple_aggregation: tuple) -> tuple:
     if (
         (len(tuple_aggregation) != 2)
         or (not isinstance(tuple_aggregation[0], str))
-        or (not isinstance(tuple_aggregation[1], (list, np.ndarray)))
+        or (
+            not (
+                (tuple_aggregation[1] is None)
+                or (isinstance(tuple_aggregation[1], (list, np.ndarray)))
+            )
+        )
     ):
         raise ValueError(
             "aggregation only accepts tuples of the form (method (str), subset (None or np.ndarray))"
