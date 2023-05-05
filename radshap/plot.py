@@ -120,9 +120,14 @@ def plot_pet(
     shap_values = shap.shapleyvalues_.copy() + shap.empty_value
     # Define color map
     if cmap_lim is None:
-        cmap = MplColorHelper(cmap_name=cmap_name, cmap_lim=(shap.empty_value, np.abs(shap.shapleyvalues_).max()))
+        cmap = MplColorHelper(
+            cmap_name=cmap_name,
+            cmap_lim=(shap.empty_value, np.abs(shap.shapleyvalues_).max()),
+        )
     else:
-        cmap = MplColorHelper(cmap_name=cmap_name, cmap_lim=(shap.empty_value, cmap_lim))
+        cmap = MplColorHelper(
+            cmap_name=cmap_name, cmap_lim=(shap.empty_value, cmap_lim)
+        )
 
     # Plot MIP views
     fig, axes = plt.subplots(1, 2, figsize=(16, 10))
@@ -150,7 +155,7 @@ def plot_pet(
         fig.subplots_adjust(right=0.9)
         cbar_ax = fig.add_axes([0.85, 0.2, 0.02, 0.6])
         cb = fig.colorbar(mappable=cmap.scalarMap, aspect=80, cax=cbar_ax)
-        cbar_ax.yaxis.set_label_position('left')
+        cbar_ax.yaxis.set_label_position("left")
         cb.set_label("Shapley values", size=12, labelpad=5)
     if title is not None:
         fig.suptitle(title, fontsize=16, y=0.15)
