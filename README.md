@@ -24,7 +24,7 @@ import joblib
 from radshap.shapley import Shapley
 
 model = joblib.load("trained_logistic_regression.joblib")
-shap = Shaplay(predictor = lambda x: model.predict_proba(x)[:, 1], aggregator = ('mean', None))
+shap = Shapley(predictor = lambda x: model.predict_proba(x)[:, 1], aggregation = ('mean', None))
 shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
 ```
 ## Acknowledgements
