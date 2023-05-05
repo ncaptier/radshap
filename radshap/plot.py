@@ -1,30 +1,97 @@
 from typing import NoReturn, Optional, Tuple, Callable, Union, Generator
 
 import SimpleITK as sitk
+import matplotlib.axes
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
 
 from ._utils import MplColorHelper
 
 
-def plot_pet_shap(
+def plot_bars(
+    shap: object,
+    nbest: Optional[int] = 10,
+    names: Optional[Union[list, None]] = None,
+    ax: Optional[Union[matplotlib.axes.Axes, None]] = None,
+) -> None:
+    """
+
+    Parameters
+    ---------
+    shap:
+
+    nbest:
+
+    names:
+
+    ax:
+
+    Returns
+    ------
+
+    """
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(10, 8))
+    if names is not None:
+        df = pd.DataFrame(shap.shapleyvalues_, index=names, columns=["shapley"])
+    else:
+        df = pd.DataFrame(
+            shap.shapleyvalues_,
+            index=["instance_" + str(i) for i in range(len(shap.shapleyvalues_))],
+            columns=["shapley"],
+        )
+
+    df["shapley_abs"] = np.abs(df["shapley"])
+    df["sign"] = 1 * (df["shapley"] > 0)
+    df = df.sort_values(by="shapley_abs", ascending=False).iloc[
+        : max(nbest, len(shap.shapleyvalues_)), :
+    ]
+
+    sns.barplot(
+        data=df.reset_index(),
+        orient="h",
+        x="shapley",
+        y="index",
+        hue="sign",
+        hue_order=[0, 1],
+        palette=["blue", "red"],
+        dodge=False,
+        ax=ax,
+    )
+    ax.set(xlabel=None, ylabel=None)
+    ax.set_axisbelow(True)
+    ax.yaxis.grid(color="gray", linestyle="dashed")
+    ax.legend().set_visible(False)
+    ax.axvline(x=0, color="k", linestyle="--")
+    ax.set_xticks(
+        ticks=ax.get_xticks(), labels=np.round(ax.get_xticks() + shap.empty_value, 4)
+    )
+    sns.despine()
+    return
+
+
+def plot_pet(
+    shap: object,
     image_path: str,
-    masks_dict: dict,
-    save_path: str,
+    masks_paths: list,
+    save_path: Optional[Union[None, str]] = None,
     alpha: Optional[float] = 0.7,
     max_suv: Optional[float] = 10,
     cmap_name: Optional[str] = "seismic",
-    cmap_lim: Optional[Tuple[float, float]] = (0, 0.5),
-    centered_norm: Optional[bool] = True,
+    cmap_lim: Optional[Union[None, float]] = None,
     plot_colorbar: Optional[bool] = True,
     title: Optional[Union[None, str]] = None,
 ) -> None:
     """
     Parameters
     ----------
+    shap:
+
     image_path:
 
-    masks_dict:
+    masks_paths:
 
     save_path:
 
@@ -35,8 +102,6 @@ def plot_pet_shap(
     cmap_name:
 
     cmap_lim:
-
-    centered_norm:
 
     plot_colorbar:
 
@@ -52,17 +117,19 @@ def plot_pet_shap(
     mip_1 = np.flipud(np.max(np.rot90(img_array, k=1, axes=(2, 1)), axis=-1))
     mip_2 = np.flipud(np.max(img_array, axis=-1))
 
+    shap_values = shap.shapleyvalues_.copy() + shap.empty_value
     # Define color map
-    cmap = MplColorHelper(
-        cmap_name=cmap_name, cmap_lim=cmap_lim, centered_norm=centered_norm
-    )
+    if cmap_lim is None:
+        cmap = MplColorHelper(cmap_name=cmap_name, cmap_lim=(shap.empty_value, np.abs(shap.shapleyvalues_).max()))
+    else:
+        cmap = MplColorHelper(cmap_name=cmap_name, cmap_lim=(shap.empty_value, cmap_lim))
 
     # Plot MIP views
     fig, axes = plt.subplots(1, 2, figsize=(16, 10))
     axes[0].imshow(mip_1, cmap="binary", vmin=0, vmax=max_suv)
     axes[1].imshow(mip_2, cmap="binary", vmin=0, vmax=max_suv)
 
-    for mask_path, importance in masks_dict.items():
+    for mask_path, importance in zip(masks_paths, shap_values):
         mask = sitk.ReadImage(mask_path)
         mask_array = sitk.GetArrayFromImage(mask).astype(np.float32)  # [-450:, :, :]
         mask_mip_1 = np.flipud(np.max(np.rot90(mask_array, k=1, axes=(2, 1)), axis=-1))
@@ -81,9 +148,12 @@ def plot_pet_shap(
     axes[1].axis("off")
     if plot_colorbar:
         fig.subplots_adjust(right=0.9)
-        cbar_ax = fig.add_axes([0.91, 0.2, 0.03, 0.6])
-        plt.colorbar(mappable=cmap.scalarMap, cax=cbar_ax)
+        cbar_ax = fig.add_axes([0.85, 0.2, 0.02, 0.6])
+        cb = fig.colorbar(mappable=cmap.scalarMap, aspect=80, cax=cbar_ax)
+        cbar_ax.yaxis.set_label_position('left')
+        cb.set_label("Shapley values", size=12, labelpad=5)
     if title is not None:
         fig.suptitle(title, fontsize=16, y=0.15)
-    fig.savefig(save_path)
+    if save_path is not None:
+        fig.savefig(save_path)
     return
