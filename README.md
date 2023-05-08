@@ -16,6 +16,9 @@ It estimates the Shapley value of the different ROIs of an image that a trained 
 ```
 pip install git+https://github.com/ncaptier/radshap.git
 ```
+## Experiments
+We provide a jupyter notebook for an illustration with PET images and simple aggregation strategies:
+* [Classification of Non-Small Cell Lung Cancer subtype and interpretation with Shaley values](examples/nsclc_subtype_classification.ipynb)
 
 ## Examples
 ```python
