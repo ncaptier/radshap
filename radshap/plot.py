@@ -11,7 +11,7 @@ from ._utils import MplColorHelper
 
 
 def plot_bars(
-    shap: object,
+    shapley_values: np.ndarray,
     nbest: Optional[int] = 10,
     names: Optional[Union[list, None]] = None,
     ax: Optional[Union[matplotlib.axes.Axes, None]] = None,
@@ -20,33 +20,39 @@ def plot_bars(
 
     Parameters
     ---------
-    shap:
+    shapley_values : 1D array shape (n_shapley_values,)
+        Shapley values.
 
-    nbest:
+    nbest : int
+        Number of values to display on the bar plot. The nbest features with the highest Shapley values (absolute value)
+        will be displayed. If the tolal number of regions is lower than nbest all the values will be displayed.
 
-    names:
+    names : list of strings or None, optional.
+        Names of the regions associated to the Shapley values. If None default names 'instance_0', ..., 'instance_n'
+        will be used. The default is None.
 
-    ax:
+    ax : matplotlib.axes, optional
+            The default is None.
 
     Returns
     ------
-
+    None.
     """
     if ax is None:
         fig, ax = plt.subplots(figsize=(10, 8))
     if names is not None:
-        df = pd.DataFrame(shap.shapleyvalues_, index=names, columns=["shapley"])
+        df = pd.DataFrame(shapley_values, index=names, columns=["shapley"])
     else:
         df = pd.DataFrame(
-            shap.shapleyvalues_,
-            index=["instance_" + str(i) for i in range(len(shap.shapleyvalues_))],
+            shapley_values,
+            index=["instance_" + str(i) for i in range(len(shapley_values))],
             columns=["shapley"],
         )
 
     df["shapley_abs"] = np.abs(df["shapley"])
     df["sign"] = 1 * (df["shapley"] > 0)
     df = df.sort_values(by="shapley_abs", ascending=False).iloc[
-        : max(nbest, len(shap.shapleyvalues_)), :
+        : max(nbest, len(shapley_values)), :
     ]
 
     sns.barplot(
@@ -65,15 +71,15 @@ def plot_bars(
     ax.yaxis.grid(color="gray", linestyle="dashed")
     ax.legend().set_visible(False)
     ax.axvline(x=0, color="k", linestyle="--")
-    ax.set_xticks(
-        ticks=ax.get_xticks(), labels=np.round(ax.get_xticks() + shap.empty_value, 4)
-    )
+    # ax.set_xticks(
+    #     ticks=ax.get_xticks(), labels=np.round(ax.get_xticks() + shap.empty_value, 4)
+    # )
     sns.despine()
     return
 
 
 def plot_pet(
-    shap: object,
+    shapley_values: np.ndarray,
     image_path: str,
     masks_paths: list,
     save_path: Optional[Union[None, str]] = None,
@@ -87,29 +93,45 @@ def plot_pet(
     """
     Parameters
     ----------
-    shap:
+    shapley_values : 1D array shape (n_shapley_values,)
+        Shapley values.
 
-    image_path:
+    image_path: string.
+        Path of the PET image. The PET image format should be compatible with simpleitk. Nifti images (.nii.gz) are
+        recommended
 
-    masks_paths:
+    masks_paths: list of strings.
+        List of paths for the masks of the regions of interest associated with the Shapley values. Nifti images
+        (.nii.gz) are recommended
 
-    save_path:
+    save_path: string or None, optional.
+        Path to save the plot. If None the plotis not saved.
+        The default is None.
 
-    alpha:
+    alpha: float in [0, 1], optional.
+        Parameter to regulate the transparancy of the colored masks.
+        The default is 0.7
 
-    max_suv:
+    max_suv: float, optional
+        Upper limit for the binary color mapping of the SUV intensities.
+        The default is 10.
 
-    cmap_name:
+    cmap_name: string, optional
+        The default is 'seismic'.
 
-    cmap_lim:
+    cmap_lim: float or None, optional
+        The default is None.
 
-    plot_colorbar:
+    plot_colorbar: bool, optional
+        The default is True.
 
-    title:
+    title: string or None, optional
+        Title of the plot. If None no title will be displayed.
+        The default is None.
 
     Returns
     -------
-    None
+    None.
     """
     # Load image and create MIP views
     img = sitk.ReadImage(image_path)
@@ -117,16 +139,18 @@ def plot_pet(
     mip_1 = np.flipud(np.max(np.rot90(img_array, k=1, axes=(2, 1)), axis=-1))
     mip_2 = np.flipud(np.max(img_array, axis=-1))
 
-    shap_values = shap.shapleyvalues_.copy() + shap.empty_value
+    # shap_values = shap.shapleyvalues_.copy() + shap.empty_value
     # Define color map
     if cmap_lim is None:
         cmap = MplColorHelper(
             cmap_name=cmap_name,
-            cmap_lim=(shap.empty_value, np.abs(shap.shapleyvalues_).max()),
+            cmap_lim=(0, np.abs(shapley_values).max()),
+            # cmap_lim=(shap.empty_value, np.abs(shap.shapleyvalues_).max()),
         )
     else:
         cmap = MplColorHelper(
-            cmap_name=cmap_name, cmap_lim=(shap.empty_value, cmap_lim)
+            cmap_name=cmap_name, cmap_lim=(0, cmap_lim)
+            # cmap_name=cmap_name, cmap_lim=(shap.empty_value, cmap_lim)
         )
 
     # Plot MIP views
@@ -134,7 +158,7 @@ def plot_pet(
     axes[0].imshow(mip_1, cmap="binary", vmin=0, vmax=max_suv)
     axes[1].imshow(mip_2, cmap="binary", vmin=0, vmax=max_suv)
 
-    for mask_path, importance in zip(masks_paths, shap_values):
+    for mask_path, importance in zip(masks_paths, shapley_values):
         mask = sitk.ReadImage(mask_path)
         mask_array = sitk.GetArrayFromImage(mask).astype(np.float32)  # [-450:, :, :]
         mask_mip_1 = np.flipud(np.max(np.rot90(mask_array, k=1, axes=(2, 1)), axis=-1))
