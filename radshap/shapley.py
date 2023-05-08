@@ -172,47 +172,6 @@ class Shapley:
         self.shapleyvalues_ = (1 / n) * np.sum(results, axis=0)
         return self.shapleyvalues_
 
-    # def plot_values(
-    #     self,
-    #     nbest: Optional[int] = 10,
-    #     names: Optional[Union[list, None]] = None,
-    #     ax: Optional[Union[matplotlib.axes.Axes, None]] = None,
-    # ) -> None:
-    #     """
-    #     Parameters
-    #     ---------
-    #     nbest: int, optional
-    #         The default is 10
-    #
-    #     names: list, None, optional
-    #         The default is None
-    #
-    #     ax : matplotlib.axes, optional
-    #         The default is None.
-    #
-    #     Returns
-    #     ------
-    #     None
-    #     """
-    #     if ax is None:
-    #         fig, ax = plt.subplots(figsize=(10, 6))
-    #     if names is not None:
-    #         df = pd.DataFrame(self.shapleyvalues_, index=names, columns=["shapley"])
-    #     else:
-    #         df = pd.DataFrame(
-    #             self.shapleyvalues_,
-    #             index=["instance_" + str(i) for i in range(len(self.shapleyvalues_))],
-    #             columns=["shapley"],
-    #         )
-    #
-    #     df["shapley_abs"] = np.abs(df["shapley"])
-    #     df = df.sort_values(by="shapley_abs", ascending=False).iloc[
-    #         : max(nbest, len(self.shapleyvalues_)), 0
-    #     ]
-    #
-    #     df.plot.barh(color=(df > 0).map({True: "red", False: "blue"}), ax=ax)
-    #     return
-
 
 def _get_permutations(n: int) -> Generator[np.ndarray, None, None]:
     """Yields permutations of the natural numbers [0, ..., n-1]"""
