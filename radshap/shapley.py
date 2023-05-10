@@ -12,9 +12,8 @@ from ._aggregator import get_batch_creator
 
 class Shapley:
     """Computes the Shapley value of every element of a collection of instances that are aggregated together in a single
-     input of a trained predictive algoirhtm.
-    It either uses an exact enumeration strategy when the number of samples is relatively small (<8) or an approximate
-    Monte Carlo scheme with antithetic sampling.
+    input of a trained predictive algorithm. It either uses an exact enumeration strategy when the number of samples is
+    relatively small (<8) or an approximate Monte Carlo scheme with antithetic sampling.
 
     Parameters
     ----------
@@ -23,26 +22,31 @@ class Shapley:
 
     aggregation: callable, tuple, list of tuples
         Aggregator that transforms an array of n_instances (with each one characterized by n_instance_features) into one
-        single vector of shape (n_input_featurs) that will be used as an input of the predictor.
+        single vector of shape (n_input_features) that will be used as an input of the predictor.
 
         To define the aggregator one can use:
 
             * a callable that takes as input a 2D array of shape (n_instances, n_instance_features) and returns a 1D
             array of shape (1, n_input_features).
-            * a tuple (method, subset) with method being a string that refers to a numpy aggregating function (e.g 'sum'
-            , 'min', 'std'...) and subset being a 1D array that defines the subset of columns/features on which to apply
-            this method (or None for applying it on all the columns/features).
-            * a list of tuples [(method_1, subset_1), (method_2, subset_2), ...] to define several aggregators. Please
-            note that the aggregated features will be ordered according to the order of the provided list (i.e
+            * a tuple (`method`, `subset`) with `method` being a string that refers to a numpy aggregating function (e.g
+            'sum', 'min', 'std'...) and `subset` being a 1D array that defines the subset of columns/features on which
+            to apply this method (or None for applying it on all the columns/features).
+            * a list of tuples [(`method_1`, `subset_1`), (`method_2`, `subset_2`), ...] to define several aggregators.
+            Please note that the aggregated features will be ordered according to the order of the provided list (i.e
             [agg_feature_method_1, ..., agg_feature_method_2, ...]).
 
-    empty_value: float, otpional
-        The default is 0.5.
+    empty_value: float, optional
+        Prediction made by the algorithm for an input with no instances (i.e random prediction). The default is 0.5.
 
     Attributes
     -------
-    shapleyvalues_: 1D array of shapes (n_instances,)
+    shapleyvalues_: 1D array of shape (n_instances,)
         Shapley value associated to each instance.
+
+    Notes
+    -----
+    For an exact estimation, the sum of the Shapley values of all instances equals the difference between the prediction
+    made for the collection of all instances and the empty/random prediction (Efficiency property).
 
     Examples
     -------
@@ -79,18 +83,27 @@ class Shapley:
         """Computes the Shapley values for each row of X.
 
         X must correspond to a valid collection of instances (shape (n_instances, n_instance_features)) that will be
-        passed to the aggregator function and then used as an input to the predictor.
+        passed to the aggregator function and then used as an input for the predictor.
 
         Parameters
         ----------
         X: 2D array of shape (n_instances, n_instance_features)
-            X corresponds to a collection of instances that will be aggregated into a single input
+            X corresponds to a collection of instances that will be aggregated into a single input.
 
         estimation_method: str {'auto', 'exact', 'antithetic'}, optional
             Estimation method for the Shapley values. The default is "auto".
 
+            * If `estimation = 'exact'`, an exact enumeration strategy is used. All the permutations of the instances
+            are considered.
+            * If `estimation = 'antithetic'`, a Monte-Carlo scheme with random permutations is applied. Antithetic
+            sampling is used to reduce the variance of the estimator. In that case the number of samples is defined by
+            `nsamples`.
+            * If `estimation = 'auto'`, the estimation method is chosen based on the number of instances. If the number
+            of instances is > 8 a Monte-Carlo scheme is applied. Otherwise, an exact scheme is applied.
+
         nsamples: str, optional
-            The default is 1000.
+            Number of samples for the Monte-Carlo scheme. It is not used only when`estimation = 'exact' or when the
+            number of instances is > 8. The default is 1000.
 
         n_jobs: int, optional
             Number of jobs to run in parallel. -1 means using all processors.
@@ -98,8 +111,8 @@ class Shapley:
 
         Returns
         -------
-        self : object
-            Returns the instance itself.
+        1D array of shape (n_instances,)
+            Shapley value associated to each instance.
         """
         self._ninstances = X.shape[0]
         if estimation_method == "auto":
@@ -122,7 +135,7 @@ class Shapley:
             )
 
     def _explain_antithetic(self, X: np.ndarray, nsamples: int, n_jobs: int) -> np.ndarray:
-        """ """
+        """ Applies Monte-Carlo scheme with antithetic sampling for estimating the Shapley values"""
         results = np.zeros((nsamples // 2, self._ninstances))
         parallel = Parallel(n_jobs=n_jobs, verbose=0)
         sampling_results = parallel(
@@ -136,7 +149,7 @@ class Shapley:
         return self.shapleyvalues_
 
     def _get_antithetic_evaluations(self, X: np.ndarray) -> object:
-        """ """
+        """ Computes one antithetic sample"""
         p = np.random.permutation(np.arange(self._ninstances))
         marginals = _get_evaluations(
             p, self.batch_creator, self.predictor, self.empty_value, X
@@ -151,7 +164,8 @@ class Shapley:
         return p, marginals + marginals_r
 
     def _explain_exact(self, X: np.ndarray, n_jobs: int) -> np.ndarray:
-        """ """
+        """ Applies exact enumeration (i.e. run through all the possible permutations for estimating the
+        Shapley values"""
         n = np.math.factorial(self._ninstances)
         results = np.zeros((n, self._ninstances))
         parallel = Parallel(n_jobs=n_jobs, verbose=0)

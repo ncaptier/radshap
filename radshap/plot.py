@@ -16,7 +16,8 @@ def plot_bars(
     names: Optional[Union[list, None]] = None,
     ax: Optional[Union[matplotlib.axes.Axes, None]] = None,
 ) -> None:
-    """
+    """ Plot the Shpaley values of different instances with a bar plot. Shapley values are ranked from tom to bottom in
+    decreasing order with respect to their absolute value.
 
     Parameters
     ---------
@@ -90,7 +91,9 @@ def plot_pet(
     plot_colorbar: Optional[bool] = True,
     title: Optional[Union[None, str]] = None,
 ) -> None:
-    """
+    """ Display the Shapley values of different instances on the Maxumum Intensity Projection (MIP) of a PET image.
+    The different values are represented with a color scale.
+
     Parameters
     ----------
     shapley_values : 1D array shape (n_shapley_values,)

@@ -20,6 +20,37 @@ _LIST_NUMPY = [
 
 
 def get_batch_creator(aggregation: Union[tuple, list, Callable]) -> Callable:
+    """ Build a batch creator that will aggregate several instances in a cumulative way.
+
+    For a set of instances | instance_1 | the batch creator will output |            aggregator(instance_1)       |
+                           | instance_2 |                               |     aggregator(instance_1, instance_2)  |
+                                ...                                                            ...
+                           | instance_k |                               | aggregator(instance_1, ..., instance_k) |
+    Parameters
+    ----------
+    aggregation: tuple, list or tuple or callable
+        Aggregation function. It could be:
+
+        * a callable that takes as input a 2D array of shape (n_instances, n_instance_features) and returns a 1D
+            array of shape (1, n_input_features).
+        * a tuple (`method`, `subset`) with `method` being a string that refers to a numpy aggregating function (e.g
+        'sum', 'min', 'std'...) and `subset` being a 1D array that defines the subset of columns/features on which
+        to apply this method (or None for applying it on all the columns/features).
+        * a list of tuples [(`method_1`, `subset_1`), (`method_2`, `subset_2`), ...] to define several aggregators.
+        Please note that the aggregated features will be ordered according to the order of the provided list (i.e
+        [agg_feature_method_1, ..., agg_feature_method_2, ...]).
+
+    Returns
+    -------
+    callable
+        Batch creator associated with the aggregator
+
+    Note
+    ----
+    If the aggregator is defined with numpy aggregating functions (i.e. tuple or list of tuples) the batch creator will
+    take advantage of numpy operations to speed up computations. Otherwise, a slow for loop will be used.
+
+    """
     if callable(aggregation):
         return _NaiveBatchCreator(aggregation)
     elif isinstance(aggregation, (list, tuple)):
