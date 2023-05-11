@@ -20,7 +20,7 @@ _LIST_NUMPY = [
 
 
 def get_batch_creator(aggregation: Union[tuple, list, Callable]) -> Callable:
-    """ Build a batch creator that will aggregate several instances in a cumulative way.
+    """Build a batch creator that will aggregate several instances in a cumulative way.
 
     For a set of instances | instance_1 | the batch creator will output |            aggregator(instance_1)       |
                            | instance_2 |                               |     aggregator(instance_1, instance_2)  |
@@ -29,27 +29,28 @@ def get_batch_creator(aggregation: Union[tuple, list, Callable]) -> Callable:
     Parameters
     ----------
     aggregation: tuple, list or tuple or callable
-        Aggregation function. It could be:
+        Aggregation function.
 
-        * a callable that takes as input a 2D array of shape (n_instances, n_instance_features) and returns a 1D
+        To define the aggregation funcion one can use::
+
+            * a callable that takes as input a 2D array of shape (n_instances, n_instance_features) and returns a 1D
             array of shape (1, n_input_features).
-        * a tuple (`method`, `subset`) with `method` being a string that refers to a numpy aggregating function (e.g
-        'sum', 'min', 'std'...) and `subset` being a 1D array that defines the subset of columns/features on which
-        to apply this method (or None for applying it on all the columns/features).
-        * a list of tuples [(`method_1`, `subset_1`), (`method_2`, `subset_2`), ...] to define several aggregators.
-        Please note that the aggregated features will be ordered according to the order of the provided list (i.e
-        [agg_feature_method_1, ..., agg_feature_method_2, ...]).
+            * a tuple (`method`, `subset`) with `method` being a string that refers to a numpy aggregating function (e.g
+            'sum', 'min', 'std'...) and `subset` being a 1D array that defines the subset of columns/features on which
+            to apply this method (or None for applying it on all the columns/features).
+            * a list of tuples [(`method_1`, `subset_1`), (`method_2`, `subset_2`), ...] to define several aggregators.
+            Please note that the aggregated features will be ordered according to the order of the provided list (i.e
+            [agg_feature_method_1, ..., agg_feature_method_2, ...]).
 
     Returns
     -------
     callable
-        Batch creator associated with the aggregator
+        Batch creator associated with the aggregation function
 
     Note
     ----
-    If the aggregator is defined with numpy aggregating functions (i.e. tuple or list of tuples) the batch creator will
-    take advantage of numpy operations to speed up computations. Otherwise, a slow for loop will be used.
-
+    If the aggregation function is defined with numpy aggregating functions (i.e. tuple or list of tuples) the batch
+    creator will take advantage of numpy operations to speed up computations. Otherwise, a slow for loop will be used.
     """
     if callable(aggregation):
         return _NaiveBatchCreator(aggregation)
@@ -73,6 +74,8 @@ class _BatchCreator:
 
 
 class _NaiveBatchCreator(_BatchCreator):
+    """Naive Batch creator for generic aggregation functions"""
+
     def _create(self, permutation: np.ndarray, X: np.ndarray) -> np.ndarray:
         X_perm = np.copy(X)[permutation, :]
         L = [
@@ -83,6 +86,8 @@ class _NaiveBatchCreator(_BatchCreator):
 
 
 class _FastBatchCreator(_BatchCreator):
+    """Fast Batch creator for aggregation functions defined with numpy operations"""
+
     def _create(self, permutation: np.ndarray, X: np.ndarray) -> np.ndarray:
         n_instances = len(permutation)
         X_perm_3d = np.tile(np.copy(X)[permutation, :], (n_instances, 1, 1))

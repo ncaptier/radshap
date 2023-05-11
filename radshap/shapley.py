@@ -13,7 +13,7 @@ from ._aggregator import get_batch_creator
 class Shapley:
     """Computes the Shapley value of every element of a collection of instances that are aggregated together in a single
     input of a trained predictive algorithm. It either uses an exact enumeration strategy when the number of samples is
-    relatively small (<8) or an approximate Monte Carlo scheme with antithetic sampling.
+    relatively small (<8) or an approximate Monte-Carlo scheme with antithetic sampling.
 
     Parameters
     ----------
@@ -134,8 +134,10 @@ class Shapley:
                 "Unrecognized estimation method. Please choose among 'auto', 'exact', or antithetic'"
             )
 
-    def _explain_antithetic(self, X: np.ndarray, nsamples: int, n_jobs: int) -> np.ndarray:
-        """ Applies Monte-Carlo scheme with antithetic sampling for estimating the Shapley values"""
+    def _explain_antithetic(
+        self, X: np.ndarray, nsamples: int, n_jobs: int
+    ) -> np.ndarray:
+        """Applies Monte-Carlo scheme with antithetic sampling for estimating the Shapley values"""
         results = np.zeros((nsamples // 2, self._ninstances))
         parallel = Parallel(n_jobs=n_jobs, verbose=0)
         sampling_results = parallel(
@@ -149,7 +151,7 @@ class Shapley:
         return self.shapleyvalues_
 
     def _get_antithetic_evaluations(self, X: np.ndarray) -> object:
-        """ Computes one antithetic sample"""
+        """Computes one antithetic sample"""
         p = np.random.permutation(np.arange(self._ninstances))
         marginals = _get_evaluations(
             p, self.batch_creator, self.predictor, self.empty_value, X
@@ -164,8 +166,8 @@ class Shapley:
         return p, marginals + marginals_r
 
     def _explain_exact(self, X: np.ndarray, n_jobs: int) -> np.ndarray:
-        """ Applies exact enumeration (i.e. run through all the possible permutations for estimating the
-        Shapley values"""
+        """Applies exact enumeration (i.e. run through all the possible permutations for estimating the
+        Shapley values)"""
         n = np.math.factorial(self._ninstances)
         results = np.zeros((n, self._ninstances))
         parallel = Parallel(n_jobs=n_jobs, verbose=0)
