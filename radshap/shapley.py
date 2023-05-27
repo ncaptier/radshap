@@ -115,6 +115,8 @@ class Shapley:
             Shapley value associated to each instance.
         """
         self._ninstances = X.shape[0]
+        self.batch_creator.check_fun_agg(X)
+
         if estimation_method == "auto":
             if self._ninstances <= 7:
                 return self._explain_exact(X, n_jobs)

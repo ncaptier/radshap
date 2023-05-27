@@ -66,6 +66,9 @@ class _BatchCreator:
     def __init__(self, aggregation):
         self.fun_agg = _get_aggregation_function(aggregation)
 
+    def check_fun_agg(self, X):
+        pass
+
     def _create(self, permutation: np.ndarray, X: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
@@ -76,10 +79,31 @@ class _BatchCreator:
 class _NaiveBatchCreator(_BatchCreator):
     """Naive Batch creator for generic aggregation functions"""
 
+    def check_fun_agg(self, X):
+        try:
+            test_results = self.fun_agg(X)
+        except Exception as err:
+            print(
+                "Your custom aggregator is not properly defined."
+            )
+            print(f"The following {err}, {type(err)} occured")
+            raise
+        else:
+            if (not isinstance(test_results, np.ndarray)) or (
+                len(np.squeeze(test_results).shape) > 1
+            ):
+                print(
+                    "Your custom aggregator should take as input a 2D array of shape "
+                    "(n_instances, n_instance_features) and it should return a vector of shape (1, n_input_features)"
+                    " (or (n_input_features,))."
+                )
+                raise
+
     def _create(self, permutation: np.ndarray, X: np.ndarray) -> np.ndarray:
+
         X_perm = np.copy(X)[permutation, :]
         L = [
-            self.fun_agg(X_perm[:i, :], **kwargs).reshape(1, -1)
+            self.fun_agg(X_perm[:i, :]).reshape(1, -1)
             for i in range(1, len(permutation) + 1)
         ]
         return np.vstack(L)
@@ -114,26 +138,7 @@ class _Aggregator3d:
 
 def _get_aggregation_function(aggregation: Union[tuple, list, Callable]) -> Callable:
     if callable(aggregation):
-        try:
-            test_results = aggregation(np.arange(12).reshape(4, 3))
-        except Exception as err:
-            print(
-                "Your custom aggregator should take as input a 2D array of shape (n_instances, n_instance_features) "
-                "and it should return a vector of shape (1, n_input_features) (or (n_input_features,))."
-            )
-            print(f"The following {err}, {type(err)} occured")
-            raise
-        else:
-            if (not isinstance(test_results, np.ndarray)) or (
-                len(np.squeeze(test_results).shape) > 1
-            ):
-                print(
-                    "Your custom aggregator should take as input a 2D array of shape "
-                    "(n_instances, n_instance_features) and it should return a vector of shape (1, n_input_features)"
-                    " (or (n_input_features,))."
-                )
-                raise
-            return aggregation
+        return aggregation
     elif isinstance(aggregation, tuple):
         method, subset = _check_aggregation(aggregation)
         return _Aggregator3d(method=method, subset=subset)
