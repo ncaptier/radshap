@@ -14,23 +14,28 @@ def plot_bars(
     shapley_values: np.ndarray,
     nbest: Optional[int] = 10,
     names: Optional[Union[list, None]] = None,
+    sort: Optional[bool] = True,
     ax: Optional[Union[matplotlib.axes.Axes, None]] = None,
 ) -> None:
-    """Plot the Shpaley values of different instances with a bar plot. Shapley values are ranked from tom to bottom in
-    decreasing order with respect to their absolute value.
+    """Plot the Shpaley values of different instances with a bar plot.
 
     Parameters
     ---------
     shapley_values : 1D array shape (n_shapley_values,)
         Shapley values.
 
-    nbest : int
+    nbest : int, optional.
         Number of values to display on the bar plot. The nbest features with the highest Shapley values (absolute value)
-        will be displayed. If the tolal number of regions is lower than nbest all the values will be displayed.
+        will be displayed. If the tolal number of regions is lower than nbest all the values will be displayed. Only
+        valid when `sort` is True. The default is 10.
 
     names : list of strings or None, optional.
         Names of the regions associated to the Shapley values. If None default names 'instance_0', ..., 'instance_n'
         will be used. The default is None.
+
+    sort : bool, optional.
+        If true Shapley values are ranked from top to bottom in decreasing order with respect to their absolute value.
+        If False all the regions will be displayed on the bar plot. The default is True.
 
     ax : matplotlib.axes, optional
             The default is None.
@@ -52,9 +57,10 @@ def plot_bars(
 
     df["shapley_abs"] = np.abs(df["shapley"])
     df["sign"] = 1 * (df["shapley"] > 0)
-    df = df.sort_values(by="shapley_abs", ascending=False).iloc[
-        : max(nbest, len(shapley_values)), :
-    ]
+    if sort:
+        df = df.sort_values(by="shapley_abs", ascending=False).iloc[
+            : max(nbest, len(shapley_values)), :
+        ]
 
     sns.barplot(
         data=df.reset_index(),
