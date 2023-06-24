@@ -30,6 +30,9 @@ model = joblib.load("trained_logistic_regression.joblib")
 shap = Shapley(predictor = lambda x: model.predict_proba(x)[:, 1], aggregation = ('mean', None))
 shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
 ```
+
+## License
+This project is licensed under a custom open-source license (see the [LICENSE.md](LICENSE.md) file for more details).
 ## Acknowledgements
 
 This package was created as a part of the PhD project of Nicolas Captier in the [Laboratory of Translational Imaging in Oncology (LITO)](https://www.lito-web.fr/en/) of Institut Curie.
