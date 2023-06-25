@@ -18,7 +18,7 @@ setuptools.setup(
         "numpy",
         "joblib>=1.1.0",
         "pandas>=1.3.5",
-        "seaborn>=0.11.2"
+        "seaborn>=0.11.2",
         "SimpleITK>=1.2.4"
     ],
     extras_require={"dev": ["pytest"]},
