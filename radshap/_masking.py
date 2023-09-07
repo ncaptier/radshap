@@ -32,7 +32,7 @@ class IndependentMaskedModel:
 
         self.model = model
         self.background_data = background_data
-        if masked_features is None:
+        if invalid_features is None:
             self.invalid_features = np.full(background_data.shape[1], True)
         else:
             self.invalid_features = invalid_features
