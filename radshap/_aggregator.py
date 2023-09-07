@@ -10,7 +10,7 @@ _LIST_NUMPY = [
     "sum",
     "var",
     "nanmin",
-    "nammax",
+    "nanmax",
     "nanmean",
     "nanprod",
     "nanstd",
