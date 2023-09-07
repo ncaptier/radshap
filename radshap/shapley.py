@@ -8,10 +8,11 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 from ._aggregator import get_batch_creator
+from ._masking import IndependentMaskedModel
 
 
 class Shapley:
-    """Computes the Shapley value of every element of a collection of instances that are aggregated together in a single
+    """Compute the Shapley value of every element of a collection of instances that are aggregated together in a single
     input of a trained predictive algorithm. It either uses an exact enumeration strategy when the number of samples is
     relatively small (<8) or an approximate Monte-Carlo scheme with antithetic sampling.
 
@@ -56,14 +57,14 @@ class Shapley:
     >>>
     >>> model = joblib.load("trained_logistic_regression.joblib")
     >>> shap = Shapley(predictor = lambda x: model.predict_proba(x)[:, 1], aggregation = ('mean', None))
-    >>> shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
+    >>> shapvalues = shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
     """
 
     def __init__(
-        self,
-        predictor: Callable[[np.ndarray], float],
-        aggregation: Callable[[np.ndarray], np.ndarray],
-        empty_value: Optional[float] = 0.5,
+            self,
+            predictor: Callable[[np.ndarray], float],
+            aggregation: Callable[[np.ndarray], np.ndarray],
+            empty_value: Optional[float] = 0.5,
     ) -> NoReturn:
 
         self.predictor = predictor
@@ -74,13 +75,13 @@ class Shapley:
         self.shapleyvalues_ = None
 
     def explain(
-        self,
-        X: np.ndarray,
-        estimation_method: Optional[str] = "auto",
-        nsamples: Optional[int] = 1000,
-        n_jobs: Optional[int] = 1,
+            self,
+            X: np.ndarray,
+            estimation_method: Optional[str] = "auto",
+            nsamples: Optional[int] = 1000,
+            n_jobs: Optional[int] = 1,
     ) -> np.ndarray:
-        """Computes the Shapley values for each row of X.
+        """Compute the Shapley values for each row of X.
 
         X must correspond to a valid collection of instances (shape (n_instances, n_instance_features)) that will be
         passed to the aggregator function and then used as an input for the predictor.
@@ -137,9 +138,9 @@ class Shapley:
             )
 
     def _explain_antithetic(
-        self, X: np.ndarray, nsamples: int, n_jobs: int
+            self, X: np.ndarray, nsamples: int, n_jobs: int
     ) -> np.ndarray:
-        """Applies Monte-Carlo scheme with antithetic sampling for estimating the Shapley values"""
+        """Apply Monte-Carlo scheme with antithetic sampling for estimating the Shapley values"""
         results = np.zeros((nsamples // 2, self._ninstances))
         parallel = Parallel(n_jobs=n_jobs, verbose=0)
         sampling_results = parallel(
@@ -153,7 +154,7 @@ class Shapley:
         return self.shapleyvalues_
 
     def _get_antithetic_evaluations(self, X: np.ndarray) -> object:
-        """Computes one antithetic sample"""
+        """Compute one antithetic sample"""
         p = np.random.permutation(np.arange(self._ninstances))
         marginals = _get_evaluations(
             p, self.batch_creator, self.predictor, self.empty_value, X
@@ -168,7 +169,7 @@ class Shapley:
         return p, marginals + marginals_r
 
     def _explain_exact(self, X: np.ndarray, n_jobs: int) -> np.ndarray:
-        """Applies exact enumeration (i.e. run through all the possible permutations for estimating the
+        """Apply exact enumeration (i.e. run through all the possible permutations for estimating the
         Shapley values)"""
         n = np.math.factorial(self._ninstances)
         results = np.zeros((n, self._ninstances))
@@ -191,18 +192,100 @@ class Shapley:
         return self.shapleyvalues_
 
 
+class RobustShapley(Shapley):
+    """ Compute the Shapley value of every element of a collection of instances that are aggregated together in a
+    single input of a trained predictive algorithm.
+
+    Deal with the cases where the aggregation function returns invalid inputs for the predictive algorithm
+    (i.e. unexpected NaN values) by replacing missing values by values from a background data set and computing the
+    average prediction over all these replacements.
+
+    Parameters
+    ----------
+    predictor: callable (input: 2D array of shape (n_inputs, n_input_features), output: 1D array of shape (n_inputs,))
+        Trained predictor that returns one single real-value prediction per input.
+
+    aggregation: callable, tuple, list of tuples
+        Aggregator that transforms an array of n_instances (with each one characterized by n_instance_features) into one
+        single vector of shape (n_input_features) that will be used as an input of the predictor.
+
+        Aggregator should deal with cases where some aggregated features cannot be computed by returning NaN values
+        instead.
+
+        To define the aggregator one can use:
+
+            * a callable that takes as input a 2D array of shape (n_instances, n_instance_features) and returns a 1D
+            array of shape (1, n_input_features).
+            * a tuple (`method`, `subset`) with `method` being a string that refers to a numpy aggregating function (e.g
+            'sum', 'min', 'std'...) and `subset` being a 1D array that defines the subset of columns/features on which
+            to apply this method (or None for applying it on all the columns/features).
+            * a list of tuples [(`method_1`, `subset_1`), (`method_2`, `subset_2`), ...] to define several aggregators.
+            Please note that the aggregated features will be ordered according to the order of the provided list (i.e
+            [agg_feature_method_1, ..., agg_feature_method_2, ...]).
+
+    background_data: 2D array of shape (n_background, n_input_features)
+        Background data set used to deal with invalid inputs for the predictor. In the case of an invalid input, we
+        generate "n_background" new inputs by replacing the invalid values with corresponding values from the background
+        data set. We then apply the predictor to each of these generated inputs and return the average predictions.
+
+    invalid_features: 1D array of shape (n_input_features)
+        Boolean array to specify the features for which a NaN value means that the input is not valid. In such cases, we
+        handle them with the background data set. If None all the features will be taken into account to define invalid
+        inputs. The default is None.
+
+    empty_value: float, optional
+        Prediction made by the algorithm for an input with no instances (i.e random prediction). The default is 0.5.
+
+    Attributes
+    -------
+    shapleyvalues_: 1D array of shape (n_instances,)
+        Shapley value associated to each instance.
+
+    Notes
+    -----
+    The strategy to deal with invalid inputs was inspired by SHAP (https://shap.readthedocs.io).
+
+    Examples
+    -------
+    >>> import numpy as np
+    >>> import joblib
+    >>> from radshap.shapley import RobustShapley
+    >>>
+    >>> model = joblib.load("trained_logistic_regression.joblib")
+    >>> shap = Shapley(predictor = lambda x: model.predict_proba(x)[:, 1],
+    >>>                aggregation = ('nanmean', None),
+    >>>                background_data = Xback) # Xback a 2D array of shape (n_samples_background, n_input_features)
+    >>> shapvalues = shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
+    """
+
+    def __init__(self,
+                 predictor: Callable[[np.ndarray], float],
+                 aggregation: Callable[[np.ndarray], np.ndarray],
+                 background_data: np.ndarray,
+                 invalid_features: Optional[Union[np.ndarray, None]] = None,
+                 empty_value: Optional[float] = 0.5,
+                 ) -> NoReturn:
+        super(RobustShapley, self).__init__(predictor=IndependentMaskedModel(model=predictor,
+                                                                             background_data=background_data,
+                                                                             invalid_features=invalid_features),
+                                            aggregation=aggregation,
+                                            empty_value=empty_value)
+        self._background_data = background_data
+        self._masked_features = invalid_features
+
+
 def _get_permutations(n: int) -> Generator[np.ndarray, None, None]:
-    """Yields permutations of the natural numbers [0, ..., n-1]"""
+    """Yield permutations of the natural numbers [0, ..., n-1]"""
     for p in permutations(range(n)):
         yield np.array(p)
 
 
 def _get_evaluations(
-    perm: np.ndarray,
-    batch_creator: Callable,
-    predictor,
-    empty_value,
-    X,
+        perm: np.ndarray,
+        batch_creator: Callable,
+        predictor,
+        empty_value,
+        X,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """ """
     batch = batch_creator(perm, X)
