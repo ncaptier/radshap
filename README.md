@@ -47,7 +47,7 @@ model = joblib.load("trained_logistic_regression.joblib")
 shap = RobustShapley(predictor = lambda x: model.predict_proba(x)[:, 1],
                      aggregation = ('nanmean', None),
                      background_data = Xback) # Xback a 2D array of shape (n_samples_background, n_input_features)
-# shapvalues = shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
+shapvalues = shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
 ```
 ## License
 This project is licensed under a custom open-source license (see the [LICENSE.md](LICENSE.md) file for more details).
