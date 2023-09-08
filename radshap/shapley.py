@@ -252,9 +252,9 @@ class RobustShapley(Shapley):
     >>> from radshap.shapley import RobustShapley
     >>>
     >>> model = joblib.load("trained_logistic_regression.joblib")
-    >>> shap = Shapley(predictor = lambda x: model.predict_proba(x)[:, 1],
-    >>>                aggregation = ('nanmean', None),
-    >>>                background_data = Xback) # Xback a 2D array of shape (n_samples_background, n_input_features)
+    >>> shap = RobustShapley(predictor = lambda x: model.predict_proba(x)[:, 1],
+    >>>                      aggregation = ('nanmean', None),
+    >>>                      background_data = Xback) # Xback a 2D array of shape (n_samples_background, n_input_features)
     >>> shapvalues = shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
     """
 
