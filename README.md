@@ -8,7 +8,7 @@ It estimates the Shapley value of the different ROIs of an image that a trained 
 ## Graphical abstract
 
 <p align="center">
-    <img src="docs/graphical_abstract.png"/>
+    <img src="docs/images/graphical_abstract.png"/>
 </p>
 <b>a.</b> schematic view of a generic aggregated radiomic model - <b>b.</b> computation of a Shapley value for a specific region.
 
