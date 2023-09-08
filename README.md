@@ -26,6 +26,7 @@ We provide a jupyter notebook for an illustration of a robust strategy for compu
 * [Robust Shapley values for explaining multi-region radiomic models with non-optional regions](examples/robust_shapleyvalues.ipynb)
 
 ## Examples
+**Explanation with Shapley values**
 ```python
 import numpy as np
 import joblib
@@ -36,6 +37,7 @@ shap = Shapley(predictor = lambda x: model.predict_proba(x)[:, 1], aggregation =
 shapvalues = shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
 ```
 
+**Robust explanation with Shapley values**
 ```python
 import numpy as np
 import joblib
