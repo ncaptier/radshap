@@ -22,6 +22,9 @@ pip install git+https://github.com/ncaptier/radshap.git
 We provide a jupyter notebook for an illustration with PET images and simple aggregation strategies:
 * [Classification of Non-Small Cell Lung Cancer subtype and interpretation with Shapley values](examples/nsclc_subtype_classification.ipynb)
 
+We provide a jupyter notebook for an illustration of a robust strategy for computing Shapley values:
+* [Robust Shapley values for explaining multi-region radiomic models with non-optional regions](examples/robust_shapleyvalues.ipynb)
+
 ## Examples
 ```python
 import numpy as np
@@ -30,9 +33,20 @@ from radshap.shapley import Shapley
 
 model = joblib.load("trained_logistic_regression.joblib")
 shap = Shapley(predictor = lambda x: model.predict_proba(x)[:, 1], aggregation = ('mean', None))
-shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
+shapvalues = shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
 ```
 
+```python
+import numpy as np
+import joblib
+from radshap.shapley import RobustShapley
+
+model = joblib.load("trained_logistic_regression.joblib")
+shap = RobustShapley(predictor = lambda x: model.predict_proba(x)[:, 1],
+                     aggregation = ('nanmean', None),
+                     background_data = Xback) # Xback a 2D array of shape (n_samples_background, n_input_features)
+# shapvalues = shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
+```
 ## License
 This project is licensed under a custom open-source license (see the [LICENSE.md](LICENSE.md) file for more details).
 ## Acknowledgements
