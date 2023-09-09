@@ -17,10 +17,10 @@ def plot_bars(
     sort: Optional[bool] = True,
     ax: Optional[Union[matplotlib.axes.Axes, None]] = None,
 ) -> None:
-    """Plot the Shpaley values of different instances with a bar plot.
+    """Plot the Shapley values of different instances with a bar plot.
 
     Parameters
-    ---------
+    ----------
     shapley_values : 1D array shape (n_shapley_values,)
         Shapley values.
 
@@ -41,7 +41,7 @@ def plot_bars(
             The default is None.
 
     Returns
-    ------
+    -------
     None.
     """
     if ax is None:

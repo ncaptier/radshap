@@ -27,20 +27,15 @@ class Shapley:
 
         To define the aggregator one can use:
 
-            * a callable that takes as input a 2D array of shape (n_instances, n_instance_features) and returns a 1D
-            array of shape (1, n_input_features).
-            * a tuple (`method`, `subset`) with `method` being a string that refers to a numpy aggregating function (e.g
-            'sum', 'min', 'std'...) and `subset` being a 1D array that defines the subset of columns/features on which
-            to apply this method (or None for applying it on all the columns/features).
-            * a list of tuples [(`method_1`, `subset_1`), (`method_2`, `subset_2`), ...] to define several aggregators.
-            Please note that the aggregated features will be ordered according to the order of the provided list (i.e
-            [agg_feature_method_1, ..., agg_feature_method_2, ...]).
+            * a callable that takes as input a 2D array of shape (n_instances, n_instance_features) and returns a 1D array of shape (1, n_input_features).
+            * a tuple (`method`, `subset`) with `method` being a string that refers to a numpy aggregating function (e.g 'sum', 'min', 'std'...) and `subset` being a 1D array that defines the subset of columns/features on which to apply this method (or None for applying it on all the columns/features).
+            * a list of tuples [(`method_1`, `subset_1`), (`method_2`, `subset_2`), ...] to define several aggregators. Please note that the aggregated features will be ordered according to the order of the provided list (i.e [agg_feature_method_1, ..., agg_feature_method_2, ...]).
 
     empty_value: float, optional
         Prediction made by the algorithm for an input with no instances (i.e random prediction). The default is 0.5.
 
     Attributes
-    -------
+    ----------
     shapleyvalues_: 1D array of shape (n_instances,)
         Shapley value associated to each instance.
 
@@ -50,7 +45,7 @@ class Shapley:
     made for the collection of all instances and the empty/random prediction (Efficiency property).
 
     Examples
-    -------
+    --------
     >>> import numpy as np
     >>> import joblib
     >>> from radshap.shapley import Shapley
@@ -94,13 +89,9 @@ class Shapley:
         estimation_method: str {'auto', 'exact', 'antithetic'}, optional
             Estimation method for the Shapley values. The default is "auto".
 
-            * If `estimation = 'exact'`, an exact enumeration strategy is used. All the permutations of the instances
-            are considered.
-            * If `estimation = 'antithetic'`, a Monte-Carlo scheme with random permutations is applied. Antithetic
-            sampling is used to reduce the variance of the estimator. In that case the number of samples is defined by
-            `nsamples`.
-            * If `estimation = 'auto'`, the estimation method is chosen based on the number of instances. If the number
-            of instances is > 8 a Monte-Carlo scheme is applied. Otherwise, an exact scheme is applied.
+            * If `estimation = 'exact'`, an exact enumeration strategy is used. All the permutations of the instances are considered.
+            * If `estimation = 'antithetic'`, a Monte-Carlo scheme with random permutations is applied. Antithetic sampling is used to reduce the variance of the estimator. In that case the number of samples is defined by `nsamples`.
+            * If `estimation = 'auto'`, the estimation method is chosen based on the number of instances. If the number of instances is > 8 a Monte-Carlo scheme is applied. Otherwise, an exact scheme is applied.
 
         nsamples: str, optional
             Number of samples for the Monte-Carlo scheme. It is not used only when`estimation = 'exact' or when the
@@ -214,14 +205,9 @@ class RobustShapley(Shapley):
 
         To define the aggregator one can use:
 
-            * a callable that takes as input a 2D array of shape (n_instances, n_instance_features) and returns a 1D
-            array of shape (1, n_input_features).
-            * a tuple (`method`, `subset`) with `method` being a string that refers to a numpy aggregating function (e.g
-            'sum', 'min', 'std'...) and `subset` being a 1D array that defines the subset of columns/features on which
-            to apply this method (or None for applying it on all the columns/features).
-            * a list of tuples [(`method_1`, `subset_1`), (`method_2`, `subset_2`), ...] to define several aggregators.
-            Please note that the aggregated features will be ordered according to the order of the provided list (i.e
-            [agg_feature_method_1, ..., agg_feature_method_2, ...]).
+            * a callable that takes as input a 2D array of shape (n_instances, n_instance_features) and returns a 1D array of shape (1, n_input_features).
+            * a tuple (`method`, `subset`) with `method` being a string that refers to a numpy aggregating function (e.g 'sum', 'min', 'std'...) and `subset` being a 1D array that defines the subset of columns/features on which to apply this method (or None for applying it on all the columns/features).
+            * a list of tuples [(`method_1`, `subset_1`), (`method_2`, `subset_2`), ...] to define several aggregators. Please note that the aggregated features will be ordered according to the order of the provided list (i.e [agg_feature_method_1, ..., agg_feature_method_2, ...]).
 
     background_data: 2D array of shape (n_background, n_input_features)
         Background data set used to deal with invalid inputs for the predictor. In the case of an invalid input, we
@@ -237,7 +223,7 @@ class RobustShapley(Shapley):
         Prediction made by the algorithm for an input with no instances (i.e random prediction). The default is 0.5.
 
     Attributes
-    -------
+    ----------
     shapleyvalues_: 1D array of shape (n_instances,)
         Shapley value associated to each instance.
 
@@ -246,7 +232,7 @@ class RobustShapley(Shapley):
     The strategy to deal with invalid inputs was inspired by SHAP (https://shap.readthedocs.io).
 
     Examples
-    -------
+    --------
     >>> import numpy as np
     >>> import joblib
     >>> from radshap.shapley import RobustShapley

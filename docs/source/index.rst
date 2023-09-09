@@ -11,10 +11,19 @@ Welcome to radshap's documentation!
    :caption: Contents:
 
 
-
 Indices and tables
 ==================
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   Install
+   api
+   release
+   about
