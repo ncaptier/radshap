@@ -1,5 +1,9 @@
 # radshap
 
+<p align="center">
+    <img src="docs/images/radshap_logo.png"/>
+</p>
+
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 This repository proposes a python tool for highlighting the contribution of different regions of interest (ROIs) to the predictions of radiomic models.
