@@ -1,8 +1,3 @@
-.. radshap documentation master file, created by
-   sphinx-quickstart on Fri Sep  8 17:07:56 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to radshap's documentation!
 ===================================
 
@@ -16,7 +11,7 @@ If you have any questions about radshap, or if you want to report an issue, plea
 What is radshap ?
 =================
 
-
+Radshap is a python tool for highlighting the contribution of different regions of interest (ROIs) to the predictions of radiomic models. It estimates the Shapley value of the different ROIs of an image that a trained radiomic model uses to obtain a prediction.
 
 Indices and tables
 ==================
