@@ -12,7 +12,7 @@ from ._masking import IndependentMaskedModel
 
 
 class Shapley:
-    """Compute the Shapley value of every element of a collection of instances that are aggregated together in a single
+    """Compute the Shapley value for every element of a collection of instances that are aggregated together in a single
     input of a trained predictive algorithm. It either uses an exact enumeration strategy when the number of samples is
     relatively small (<8) or an approximate Monte-Carlo scheme with antithetic sampling.
 
@@ -184,8 +184,8 @@ class Shapley:
 
 
 class RobustShapley(Shapley):
-    """ Compute the Shapley value of every element of a collection of instances that are aggregated together in a
-    single input of a trained predictive algorithm.
+    """ Compute the Shapley value while dealing with invalid inputs for every element of a collection of instances that
+    are aggregated together in a single input of a trained predictive algorithm.
 
     Deal with the cases where the aggregation function returns invalid inputs for the predictive algorithm
     (i.e. unexpected NaN values) by replacing missing values by values from a background data set and computing the
