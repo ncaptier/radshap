@@ -4,7 +4,10 @@
     <img src="docs/images/radshap_logo.png"/>
 </p>
 
+[![Documentation Status](https://readthedocs.org/projects/radshap/badge/?version=latest)](https://radshap.readthedocs.io/en/latest/?badge=latest)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![PyPI version](https://badge.fury.io/py/radshap.svg)](https://badge.fury.io/py/radshap)
+[![Downloads](https://pepy.tech/badge/radshap)](https://pepy.tech/project/radhsap)
 
 This repository proposes a python tool for highlighting the contribution of different regions of interest (ROIs) to the predictions of radiomic models.
 It estimates the Shapley value of the different ROIs of an image that a trained radiomic model uses to obtain a prediction.
