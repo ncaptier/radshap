@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="radshap",
-    version="0.0.1a",
+    version="0.0.1",
     author="Nicolas Captier",
     author_email="nicolas.captier@curie.fr",
     description="Shapley values for interpreting radiomic models",
