@@ -51,3 +51,4 @@ ENV/
 # input data
 data/
 build/
+dist/
