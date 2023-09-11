@@ -6,9 +6,16 @@
 Welcome to radshap's documentation!
 ===================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+We hope it will guide you through the use of our package for any of your projects.
+
+.. figure:: ../images/radshap_logo.png
+   :align: center
+
+If you have any questions about radshap, or if you want to report an issue, please do not hesitate to `contact us <about.html#contact-us>`_ or raise an issue on `GitHub <https://github.com/ncaptier/radshap/issues>`_.
+
+What is radshap ?
+=================
+
 
 
 Indices and tables
@@ -25,5 +32,6 @@ Indices and tables
 
    Install
    api
+   examples
    release
    about
