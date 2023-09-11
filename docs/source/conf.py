@@ -27,10 +27,12 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.coverage",
+    "sphinx.ext.linkcode",
     "numpydoc",
     "sphinx.ext.autosectionlabel",
     "sphinx_gallery.load_style",
     "nbsphinx",
+    'IPython.sphinxext.ipython_console_highlighting',
 ]
 autodoc_typehints = "none"
 
@@ -60,7 +62,7 @@ autosummary_generate = True
 source_suffix = ".rst"
 
 templates_path = ['_templates']
-exclude_patterns = []
+exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 master_doc = "index"
 # -- Options for HTML output -------------------------------------------------
@@ -70,4 +72,30 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_logo = "../images/radshap_logo.png"
 # html_theme_options = {"sidebarbgcolor": "#000000"}
+htmlhelp_basename = "radshapdoc"
 
+import radshap
+
+
+def linkcode_resolve(domain, info):
+    def find_source():
+        # try to find the file and line number, based on code from numpy:
+        # https://github.com/numpy/numpy/blob/master/doc/source/conf.py#L286
+        obj = sys.modules[info["module"]]
+        for part in info["fullname"].split("."):
+            obj = getattr(obj, part)
+        import inspect
+        import os
+
+        fn = inspect.getsourcefile(obj)
+        fn = os.path.relpath(fn, start=os.path.dirname(radshap.__file__))
+        source, lineno = inspect.getsourcelines(obj)
+        return fn, lineno, lineno + len(source) - 1
+
+    if domain != "py" or not info["module"]:
+        return None
+    try:
+        filename = "radshap/%s#L%d-L%d" % find_source()
+    except Exception:
+        filename = info["module"].replace(".", "/") + ".py"
+    return "https://github.com/ncaptier/radshap/blob/master/%s" % filename
