@@ -23,7 +23,7 @@ setuptools.setup(
     ],
 
     extras_require={"dev": ["pytest"],
-                    "docs": ["sphinx == 7.1.2", "sphinx-gallery == 0.14.0", "numpydoc == 1.5.0", "nbsphinx == 0.9.3",
+                    "docs": ["sphinx==5.3.0", "sphinx-gallery == 0.14.0", "numpydoc == 1.5.0", "nbsphinx == 0.9.3",
                              "ipython==8.12.2", "sphinx-rtd-theme==1.3.0"]},
 
     classifiers=[
