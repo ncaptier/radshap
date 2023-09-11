@@ -21,6 +21,12 @@ It estimates the Shapley value of the different ROIs of an image that a trained 
 
 ## Install
 
+
+### Install the latest stable version with PyPi
+```
+pip install radshap
+```
+
 ### Install from source
 ```
 pip install git+https://github.com/ncaptier/radshap.git
