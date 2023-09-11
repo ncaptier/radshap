@@ -11,9 +11,9 @@ This is the class and function reference of radshap.
    :toctree: generated
    :template: class.rst
 
-
-   shapley.RobustShapley
    shapley.Shapley
+   shapley.RobustShapley
+
 
 .. autosummary::
    :nosignatures:
