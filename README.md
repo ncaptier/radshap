@@ -19,6 +19,10 @@ It estimates the Shapley value of the different ROIs of an image that a trained 
 </p>
 <b>a.</b> schematic view of a generic aggregated radiomic model - <b>b.</b> computation of a Shapley value for a specific region.
 
+## Documentation
+
+[https://radshap.readthedocs.io/en/latest](https://radshap.readthedocs.io/en/latest)
+
 ## Install
 
 
