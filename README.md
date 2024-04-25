@@ -39,6 +39,9 @@ pip install git+https://github.com/ncaptier/radshap.git
 We provide a jupyter notebook for an illustration with PET images and simple aggregation strategies:
 * [Classification of Non-Small Cell Lung Cancer subtype and interpretation with Shapley values](examples/nsclc_subtype_classification.ipynb)
 
+We provide a jupyter notebook for an illustration with PET images and custom aggregation strategies:
+* [PFS prediction for NSCLC patients undergoing immunotherapy and interpretation with Shapley values](examples/nsclc_survival_prediction.ipynb)
+
 We provide a jupyter notebook for an illustration of a robust strategy for computing Shapley values:
 * [Robust Shapley values for explaining multi-region radiomic models with non-optional regions](examples/robust_shapleyvalues.ipynb)
 
@@ -66,6 +69,42 @@ shap = RobustShapley(predictor = lambda x: model.predict_proba(x)[:, 1],
                      background_data = Xback) # Xback a 2D array of shape (n_samples_background, n_input_features)
 shapvalues = shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
 ```
+
+**Explanation with Shapley values and custom aggregation function**
+```python
+import numpy as np
+import joblib
+from radshap.shapley import Shapley
+
+model = joblib.load("trained_linear_regression.joblib")
+# Compute the average prediction to approximate a "random" prediction with no information (required for RadShap)
+predictions = np.load('predictions.npy')
+mean_pred = predictions.mean()
+
+def custom_agg_function(Xsub):
+    """ Aggregate an arbitrary subset of regions (Xsub array with and arbitray 
+    number of rows) into a valid aggregated input for the predictive model.
+    
+    Parameters
+    ---------
+    Xsub: 2D array of shape (n_instances, n_instance_features)
+    
+    Returns
+    -------
+    agg_input: 1D array of shape (1, n_input_features)
+    """ 
+    
+    ... #aggregate information from the differente regions in Xsub (i.e rows)
+    ... #to obtain a valid aggregated input for the predictive model
+    
+    return agg_input
+
+shap = Shapley(predictor = lambda x: model.predict(x),
+               aggregation = custom_agg_function,
+               empty_value = mean_pred)
+shapvalues = shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
+```
+
 ## License
 This project is licensed under a custom open-source license (see the [LICENSE.md](LICENSE.md) file for more details).
 ## Acknowledgements
