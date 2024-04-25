@@ -92,6 +92,7 @@ def plot_pet(
     save_path: Optional[Union[None, str]] = None,
     alpha: Optional[float] = 0.7,
     max_suv: Optional[float] = 10,
+    threshold_suv: Optional[Union[None, float]] = None,
     cmap_name: Optional[str] = "seismic",
     cmap_lim: Optional[Union[None, float]] = None,
     plot_colorbar: Optional[bool] = True,
@@ -125,6 +126,10 @@ def plot_pet(
         Upper limit for the binary color mapping of the SUV intensities.
         The default is 10.
 
+    threshold_suv: float, optional
+        Lower SUV threshold to resegment the masks before displaying the Shapley values. If None, no resegmentation
+        is performed. The default is None.
+
     cmap_name: string, optional
         The default is 'seismic'.
 
@@ -144,7 +149,7 @@ def plot_pet(
     """
     # Load image and create MIP views
     img = sitk.ReadImage(image_path)
-    img_array = sitk.GetArrayFromImage(img).astype(np.float32)  # [-450:, :, :]
+    img_array = sitk.GetArrayFromImage(img).astype(np.float32) #[-450:, :, :]
     mip_1 = np.flipud(np.max(np.rot90(img_array, k=1, axes=(2, 1)), axis=-1))
     mip_2 = np.flipud(np.max(img_array, axis=-1))
 
@@ -170,7 +175,9 @@ def plot_pet(
 
     for mask_path, importance in zip(masks_paths, shapley_values):
         mask = sitk.ReadImage(mask_path)
-        mask_array = sitk.GetArrayFromImage(mask).astype(np.float32)  # [-450:, :, :]
+        mask_array = sitk.GetArrayFromImage(mask).astype(np.float32) #[-450:, :, :]
+        if threshold_suv is not None:
+            mask_array[mask_array == 1] = (img_array[mask_array == 1] >= threshold_suv).astype(np.float32)
         mask_mip_1 = np.flipud(np.max(np.rot90(mask_array, k=1, axes=(2, 1)), axis=-1))
         mask_mip_2 = np.flipud(np.max(mask_array, axis=-1))
         color = cmap.get_rgb(importance, alpha=alpha)
