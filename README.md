@@ -35,6 +35,7 @@ pip install radshap
 ```
 pip install git+https://github.com/ncaptier/radshap.git
 ```
+
 ## Experiments
 We provide a jupyter notebook for an illustration with PET images and simple aggregation strategies:
 * [Classification of Non-Small Cell Lung Cancer subtype and interpretation with Shapley values](examples/nsclc_subtype_classification.ipynb)
@@ -103,6 +104,14 @@ shap = Shapley(predictor = lambda x: model.predict(x),
                aggregation = custom_agg_function,
                empty_value = mean_pred)
 shapvalues = shap.explain(X) # X a 2D array of shape (n_instances, n_instance_features)
+```
+
+## Citing RadShap
+
+If you use RadShap in a scientific publication, please cite the [following paper](https://jnm.snmjournals.org/content/early/2024/06/21/jnumed.124.267434):
+
+```
+Nicolas Captier, Fanny Orlhac, Narinée Hovhannisyan-Baghdasarian, Marie Luporsi, Nicolas Girard and Irène Buvat. RadShap: An Explanation Tool for Highlighting the Contributions of Multiple Regions of Interest to the Prediction of Radiomic Models. Journal of Nuclear Medicine, 2024, DOI: https://doi.org/10.2967/jnumed.124.267434 
 ```
 
 ## License
