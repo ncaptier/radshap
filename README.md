@@ -118,4 +118,5 @@ Nicolas Captier, Fanny Orlhac, Narinée Hovhannisyan-Baghdasarian, Marie Luporsi
 This project is licensed under a custom open-source license (see the [LICENSE.md](LICENSE.md) file for more details).
 ## Acknowledgements
 
-This package was created as a part of the PhD project of Nicolas Captier in the [Laboratory of Translational Imaging in Oncology (LITO)](https://www.lito-web.fr/en/) of Institut Curie.
+This package was created as a part of the PhD project of [Nicolas Captier](
+https://ncaptier.github.io/) in the [Laboratory of Translational Imaging in Oncology (LITO)](https://www.lito-web.fr/en/) of Institut Curie.
